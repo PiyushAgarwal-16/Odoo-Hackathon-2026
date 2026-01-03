@@ -4,6 +4,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function SignInPage() {
     const [loginId, setLoginId] = useState('');
@@ -41,76 +44,81 @@ export default function SignInPage() {
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
-            <div className="w-full max-w-md">
+        <div className="flex min-h-screen items-center justify-center bg-background px-6">
+            <div className="w-full max-w-md space-y-8">
                 {/* Logo and Title */}
-                <div className="mb-8 text-center">
-                    <h1 className="text-4xl font-bold text-gray-900">Dayflow</h1>
-                    <p className="mt-2 text-sm text-gray-600">Every workday, perfectly aligned.</p>
+                <div className="text-center space-y-3">
+                    <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+                        Dayflow
+                    </h1>
+                    <p className="text-muted-foreground text-lg">Every workday, perfectly aligned.</p>
                 </div>
 
                 {/* Sign In Card */}
-                <div className="bg-white shadow-xl rounded-2xl p-8">
-                    <h2 className="text-2xl font-semibold text-gray-900 mb-6">Sign In</h2>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Welcome back</CardTitle>
+                        <CardDescription>Sign in to your account to continue</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        {error && (
+                            <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl">
+                                {error}
+                            </div>
+                        )}
 
-                    {error && (
-                        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
-                            {error}
+                        <form onSubmit={handleSubmit} className="space-y-5">
+                            <div className="space-y-2">
+                                <label htmlFor="loginId" className="text-sm font-medium text-foreground">
+                                    Login ID / Email
+                                </label>
+                                <Input
+                                    id="loginId"
+                                    type="text"
+                                    value={loginId}
+                                    onChange={(e) => setLoginId(e.target.value)}
+                                    required
+                                    placeholder="OIADMI20260001"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label htmlFor="password" className="text-sm font-medium text-foreground">
+                                    Password
+                                </label>
+                                <Input
+                                    id="password"
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    placeholder="••••••••"
+                                />
+                            </div>
+
+                            <Button
+                                type="submit"
+                                disabled={loading}
+                                className="w-full"
+                                size="lg"
+                            >
+                                {loading ? 'Signing in...' : 'Sign In'}
+                            </Button>
+                        </form>
+
+                        {/* Demo Credentials */}
+                        <div className="pt-6 border-t border-border space-y-3">
+                            <p className="text-sm font-semibold text-foreground">Demo Credentials:</p>
+                            <div className="text-sm text-muted-foreground space-y-2">
+                                <p><span className="font-medium">Admin:</span> OIADMI20260001 / Admin@123</p>
+                                <p><span className="font-medium">Employee:</span> OIJODO20260001 / Employee@123</p>
+                            </div>
                         </div>
-                    )}
-
-                    <form onSubmit={handleSubmit} className="space-y-5">
-                        <div>
-                            <label htmlFor="loginId" className="block text-sm font-medium text-gray-700 mb-1">
-                                Login ID / Email
-                            </label>
-                            <input
-                                id="loginId"
-                                type="text"
-                                value={loginId}
-                                onChange={(e) => setLoginId(e.target.value)}
-                                required
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                                placeholder="OIADMI20260001"
-                            />
-                        </div>
-
-                        <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                                Password
-                            </label>
-                            <input
-                                id="password"
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                                placeholder="••••••••"
-                            />
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {loading ? 'Signing in...' : 'Sign In'}
-                        </button>
-                    </form>
-
-                    {/* Demo Credentials */}
-                    <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                        <p className="text-xs font-semibold text-gray-700 mb-2">Demo Credentials:</p>
-                        <div className="text-xs text-gray-600 space-y-1">
-                            <p><strong>Admin:</strong> OIADMI20260001 / Admin@123</p>
-                            <p><strong>Employee:</strong> OIJODO20260001 / Employee@123</p>
-                        </div>
-                    </div>
-                </div>
+                    </CardContent>
+                </Card>
 
                 {/* Footer */}
-                <p className="mt-6 text-center text-sm text-gray-600">
+                <p className="text-center text-sm text-muted-foreground">
                     © 2026 Dayflow HRMS. Built for hackathons.
                 </p>
             </div>
