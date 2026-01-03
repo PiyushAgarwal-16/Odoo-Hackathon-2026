@@ -5,14 +5,18 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
     "start": "node dist/index.js",
+    "build": "tsc",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
     "prisma:seed": "tsx prisma/seed.ts",
     "prisma:studio": "prisma studio"
   },
-  "keywords": ["hrms", "hr", "employee-management"],
+  "keywords": [
+    "hrms",
+    "hr",
+    "employee-management"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
