@@ -35,6 +35,21 @@ app.get('/', (_req, res) => {
     });
 });
 
+app.get('/api', (_req, res) => {
+    res.json({
+        message: 'Dayflow HRMS API',
+        version: '1.0.0',
+        status: 'running',
+        endpoints: {
+            auth: '/api/auth/signin, /api/auth/signup',
+            employees: '/api/employees',
+            attendance: '/api/attendance',
+            leaves: '/api/leaves',
+            salary: '/api/salary'
+        }
+    });
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/attendance', attendanceRoutes);
