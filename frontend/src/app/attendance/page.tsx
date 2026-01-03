@@ -11,12 +11,38 @@ import api from '@/lib/api';
 import { format } from 'date-fns';
 import { AdminAttendanceView } from '@/components/attendance/AdminAttendanceView';
 
+interface AttendanceRecord {
+    id: string;
+    date: string;
+    checkIn: string | null;
+    checkOut: string | null;
+    workHours: number;
+    extraHours: number;
+    status: string;
+    employee?: {
+        id: string;
+        firstName: string;
+        lastName: string;
+        profilePicture?: string;
+    };
+}
+
+interface AttendanceStats {
+    totalDays: number;
+    presentDays: number;
+    absentDays: number;
+    halfDays: number;
+    leaveDays: number;
+    totalWorkHours: number;
+    totalExtraHours: number;
+}
+
 export default function AttendancePage() {
     const { user } = useAuthStore();
-    const [todayAttendance, setTodayAttendance] = useState<any>(null);
-    const [attendances, setAttendances] = useState<any[]>([]);
+    const [todayAttendance, setTodayAttendance] = useState<AttendanceRecord | null>(null);
+    const [attendances, setAttendances] = useState<AttendanceRecord[]>([]);
     const [loading, setLoading] = useState(false);
-    const [stats, setStats] = useState<any>(null);
+    const [stats, setStats] = useState<AttendanceStats | null>(null);
 
     useEffect(() => {
         fetchAttendanceData();
@@ -45,8 +71,9 @@ export default function AttendancePage() {
         try {
             await api.post('/attendance/check-in');
             fetchAttendanceData();
-        } catch (error: any) {
-            alert(error.response?.data?.error || 'Check-in failed');
+        } catch (error) {
+            const err = error as { response?: { data?: { error?: string } } };
+            alert(err.response?.data?.error || 'Check-in failed');
         }
     };
 
@@ -54,8 +81,9 @@ export default function AttendancePage() {
         try {
             await api.post('/attendance/check-out');
             fetchAttendanceData();
-        } catch (error: any) {
-            alert(error.response?.data?.error || 'Check-out failed');
+        } catch (error) {
+            const err = error as { response?: { data?: { error?: string } } };
+            alert(err.response?.data?.error || 'Check-out failed');
         }
     };
 
@@ -189,7 +217,7 @@ export default function AttendancePage() {
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-200">
-                                            {attendances.map((attendance) => (
+                                            {attendances.map((attendance: AttendanceRecord) => (
                                                 <tr key={attendance.id}>
                                                     <td className="px-4 py-3 text-sm">{format(new Date(attendance.date), 'MMM d, yyyy')}</td>
                                                     <td className="px-4 py-3 text-sm">

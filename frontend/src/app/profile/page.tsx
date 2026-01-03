@@ -11,12 +11,51 @@ import { Badge } from '@/components/ui/badge';
 import { useAuthStore } from '@/store/authStore';
 import api from '@/lib/api';
 
+interface EmployeeData {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string;
+    residingAddress?: string;
+    personalEmail?: string;
+    salaryInfo?: SalaryInfo;
+    skills?: string[];
+    workExperience?: string[];
+    education?: string[];
+    [key: string]: unknown;
+}
+
+interface SalaryInfo {
+    monthlyWage: number;
+    yearlyWage: number;
+    basicSalary: number;
+    hra: number;
+    standardAllowance: number;
+    performanceBonus: number;
+    lta: number;
+    fixedAllowance: number;
+    pfEmployee: number;
+    pfEmployer: number;
+    professionalTax: number;
+}
+
+interface SalarySlipData {
+    meta: {
+        month: number;
+        year: number;
+        totalDays: number;
+        payableDays: number;
+    };
+    contractualSalary: SalaryInfo;
+    payableSalary: SalaryInfo;
+}
+
 export default function ProfilePage() {
-    const { user } = useAuthStore();
-    const [employee, setEmployee] = useState<any>(null);
+    const [employee, setEmployee] = useState<EmployeeData | null>(null);
     const [activeTab, setActiveTab] = useState('info');
     const [isEditing, setIsEditing] = useState(false);
-    const [formData, setFormData] = useState<any>({});
+    const [formData, setFormData] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -39,7 +78,7 @@ export default function ProfilePage() {
         }
     };
 
-    const [salarySlip, setSalarySlip] = useState<any>(null);
+    const [salarySlip, setSalarySlip] = useState<SalarySlipData | null>(null);
 
     useEffect(() => {
         if (activeTab === 'salary' && employee?.id) {
@@ -61,8 +100,9 @@ export default function ProfilePage() {
             await api.put(`/employees/${employee.id}`, formData);
             fetchProfile();
             setIsEditing(false);
-        } catch (error: any) {
-            alert(error.response?.data?.error || 'Failed to update profile');
+        } catch (error) {
+            const err = error as { response?: { data?: { error?: string } } };
+            alert(err.response?.data?.error || 'Update failed');
         }
     };
 
