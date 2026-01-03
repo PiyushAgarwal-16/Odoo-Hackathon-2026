@@ -42,4 +42,14 @@ router.post(
     salaryController.calculateSalary
 );
 
+// Get salary slip (Payable Salary)
+router.get(
+    '/:employeeId/slip',
+    authenticate,
+    checkAdminOrSelf,
+    param('employeeId').notEmpty().withMessage('Employee ID is required'),
+    validate,
+    salaryController.getSalarySlip
+);
+
 export default router;

@@ -39,6 +39,23 @@ export default function ProfilePage() {
         }
     };
 
+    const [salarySlip, setSalarySlip] = useState<any>(null);
+
+    useEffect(() => {
+        if (activeTab === 'salary' && employee?.id) {
+            fetchSalarySlip();
+        }
+    }, [activeTab, employee]);
+
+    const fetchSalarySlip = async () => {
+        try {
+            const response = await api.get(`/salary/${employee.id}/slip`);
+            setSalarySlip(response.data);
+        } catch (error) {
+            console.error('Failed to fetch salary slip:', error);
+        }
+    };
+
     const handleUpdate = async () => {
         try {
             await api.put(`/employees/${employee.id}`, formData);
@@ -93,8 +110,8 @@ export default function ProfilePage() {
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
                                     className={`${activeTab === tab
-                                            ? 'border-blue-500 text-blue-600'
-                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                        ? 'border-blue-500 text-blue-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                                         } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm capitalize`}
                                 >
                                     {tab}
@@ -239,62 +256,114 @@ export default function ProfilePage() {
                                 <CardTitle>Salary Information</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <div className="space-y-6">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <Label>Monthly Wage</Label>
-                                            <p className="text-2xl font-bold text-gray-900">
-                                                ₹{employee.salaryInfo.monthlyWage.toLocaleString()}
-                                            </p>
+                                <div className="space-y-8">
+                                    {/* Payable Estimate */}
+                                    {salarySlip && (
+                                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                                            <h3 className="text-lg font-semibold text-blue-900 mb-2">Estimated Payout (This Month)</h3>
+                                            <div className="flex justify-between items-center mb-4">
+                                                <div>
+                                                    <p className="text-sm text-blue-700">Payable Days: {salarySlip.meta.payableDays} / {salarySlip.meta.totalDays}</p>
+                                                    <p className="text-xs text-blue-600">Based on attendance & approved leaves</p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-2xl font-bold text-blue-900">
+                                                        ₹{(
+                                                            salarySlip.payableSalary.basicSalary +
+                                                            salarySlip.payableSalary.hra +
+                                                            salarySlip.payableSalary.standardAllowance +
+                                                            salarySlip.payableSalary.performanceBonus +
+                                                            salarySlip.payableSalary.lta +
+                                                            salarySlip.payableSalary.fixedAllowance -
+                                                            salarySlip.payableSalary.pfEmployee -
+                                                            salarySlip.payableSalary.professionalTax
+                                                        ).toLocaleString()}
+                                                    </p>
+                                                    <p className="text-xs text-blue-600">Net Payable</p>
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4 text-sm text-blue-800">
+                                                <div className="flex justify-between">
+                                                    <span>Gross Earnings</span>
+                                                    <span className="font-medium">₹{(
+                                                        salarySlip.payableSalary.basicSalary +
+                                                        salarySlip.payableSalary.hra +
+                                                        salarySlip.payableSalary.standardAllowance +
+                                                        salarySlip.payableSalary.performanceBonus +
+                                                        salarySlip.payableSalary.lta +
+                                                        salarySlip.payableSalary.fixedAllowance
+                                                    ).toLocaleString()}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                    <span>Total Deductions</span>
+                                                    <span className="font-medium">₹{(
+                                                        salarySlip.payableSalary.pfEmployee +
+                                                        salarySlip.payableSalary.professionalTax
+                                                    ).toLocaleString()}</span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <Label>Yearly Wage</Label>
-                                            <p className="text-2xl font-bold text-gray-900">
-                                                ₹{employee.salaryInfo.yearlyWage.toLocaleString()}
-                                            </p>
-                                        </div>
-                                    </div>
+                                    )}
 
-                                    <div>
-                                        <h4 className="font-medium mb-3">Salary Components</h4>
-                                        <div className="space-y-2">
-                                            <div className="flex justify-between text-sm">
-                                                <span>Basic Salary (50%)</span>
-                                                <span className="font-medium">₹{employee.salaryInfo.basicSalary.toLocaleString()}</span>
+                                    {/* Contractual Structure */}
+                                    <div className="border-t pt-6">
+                                        <h3 className="text-lg font-semibold mb-4">Contractual Salary Structure</h3>
+                                        <div className="grid grid-cols-2 gap-4 mb-6">
+                                            <div>
+                                                <Label>Monthly Wage</Label>
+                                                <p className="text-2xl font-bold text-gray-900">
+                                                    ₹{employee.salaryInfo.monthlyWage.toLocaleString()}
+                                                </p>
                                             </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span>HRA (50% of Basic)</span>
-                                                <span className="font-medium">₹{employee.salaryInfo.hra.toLocaleString()}</span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span>Standard Allowance</span>
-                                                <span className="font-medium">₹{employee.salaryInfo.standardAllowance.toLocaleString()}</span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span>Performance Bonus (8.33%)</span>
-                                                <span className="font-medium">₹{employee.salaryInfo.performanceBonus.toLocaleString()}</span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span>LTA (8.33%)</span>
-                                                <span className="font-medium">₹{employee.salaryInfo.lta.toLocaleString()}</span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span>Fixed Allowance</span>
-                                                <span className="font-medium">₹{employee.salaryInfo.fixedAllowance.toLocaleString()}</span>
+                                            <div>
+                                                <Label>Yearly Wage</Label>
+                                                <p className="text-2xl font-bold text-gray-900">
+                                                    ₹{employee.salaryInfo.yearlyWage.toLocaleString()}
+                                                </p>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div>
-                                        <h4 className="font-medium mb-3">Deductions</h4>
-                                        <div className="space-y-2">
-                                            <div className="flex justify-between text-sm">
-                                                <span>PF (Employee - 12%)</span>
-                                                <span className="font-medium text-red-600">-₹{employee.salaryInfo.pfEmployee.toLocaleString()}</span>
+                                        <div>
+                                            <h4 className="font-medium mb-3">Salary Components</h4>
+                                            <div className="space-y-2">
+                                                <div className="flex justify-between text-sm">
+                                                    <span>Basic Salary (50%)</span>
+                                                    <span className="font-medium">₹{employee.salaryInfo.basicSalary.toLocaleString()}</span>
+                                                </div>
+                                                <div className="flex justify-between text-sm">
+                                                    <span>HRA (50% of Basic)</span>
+                                                    <span className="font-medium">₹{employee.salaryInfo.hra.toLocaleString()}</span>
+                                                </div>
+                                                <div className="flex justify-between text-sm">
+                                                    <span>Standard Allowance</span>
+                                                    <span className="font-medium">₹{employee.salaryInfo.standardAllowance.toLocaleString()}</span>
+                                                </div>
+                                                <div className="flex justify-between text-sm">
+                                                    <span>Performance Bonus (8.33%)</span>
+                                                    <span className="font-medium">₹{employee.salaryInfo.performanceBonus.toLocaleString()}</span>
+                                                </div>
+                                                <div className="flex justify-between text-sm">
+                                                    <span>LTA (8.33%)</span>
+                                                    <span className="font-medium">₹{employee.salaryInfo.lta.toLocaleString()}</span>
+                                                </div>
+                                                <div className="flex justify-between text-sm">
+                                                    <span>Fixed Allowance</span>
+                                                    <span className="font-medium">₹{employee.salaryInfo.fixedAllowance.toLocaleString()}</span>
+                                                </div>
                                             </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span>Professional Tax</span>
-                                                <span className="font-medium text-red-600">-₹{employee.salaryInfo.professionalTax.toLocaleString()}</span>
+                                        </div>
+
+                                        <div className="mt-6">
+                                            <h4 className="font-medium mb-3">Deductions</h4>
+                                            <div className="space-y-2">
+                                                <div className="flex justify-between text-sm">
+                                                    <span>PF (Employee - 12%)</span>
+                                                    <span className="font-medium text-red-600">-₹{employee.salaryInfo.pfEmployee.toLocaleString()}</span>
+                                                </div>
+                                                <div className="flex justify-between text-sm">
+                                                    <span>Professional Tax</span>
+                                                    <span className="font-medium text-red-600">-₹{employee.salaryInfo.professionalTax.toLocaleString()}</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuthStore } from '@/store/authStore';
 import api from '@/lib/api';
 import { format } from 'date-fns';
+import { AdminAttendanceView } from '@/components/attendance/AdminAttendanceView';
 
 export default function AttendancePage() {
     const { user } = useAuthStore();
@@ -61,13 +62,29 @@ export default function AttendancePage() {
     const canCheckIn = !todayAttendance || !todayAttendance.checkIn;
     const canCheckOut = todayAttendance?.checkIn && !todayAttendance?.checkOut;
 
+    if (user?.role === 'ADMIN' || user?.role === 'HR') {
+        return (
+            <ProtectedRoute>
+                <div className="min-h-screen bg-gray-50">
+                    <Navbar />
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        <div className="flex justify-between items-center mb-8">
+                            <h1 className="text-3xl font-bold text-gray-900">Attendance Management</h1>
+                        </div>
+                        <AdminAttendanceView initialAttendances={attendances} />
+                    </div>
+                </div>
+            </ProtectedRoute>
+        );
+    }
+
     return (
         <ProtectedRoute>
             <div className="min-h-screen bg-gray-50">
                 <Navbar />
 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-8">Attendance</h1>
+                    <h1 className="text-3xl font-bold text-gray-900 mb-8">My Attendance</h1>
 
                     {/* Today's Attendance Card */}
                     <Card className="mb-8">
