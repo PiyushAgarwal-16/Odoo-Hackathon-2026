@@ -4,7 +4,6 @@ import prisma from '../config/database';
 import { hashPassword, comparePassword, generateRandomPassword, validatePassword } from '../utils/password';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt';
 import { generateLoginId } from '../utils/loginId';
-import { AppError } from '../middleware/error';
 
 export const signup = async (req: AuthRequest, res: Response): Promise<void> => {
     try {

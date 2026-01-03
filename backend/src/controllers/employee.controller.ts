@@ -1,7 +1,6 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth';
 import prisma from '../config/database';
-import { AppError } from '../middleware/error';
 
 export const getEmployees = async (req: AuthRequest, res: Response): Promise<void> => {
     try {

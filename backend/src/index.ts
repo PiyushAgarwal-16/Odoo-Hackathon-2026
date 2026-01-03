@@ -20,7 +20,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
     res.json({
         message: 'Dayflow HRMS API',
         version: '1.0.0',
