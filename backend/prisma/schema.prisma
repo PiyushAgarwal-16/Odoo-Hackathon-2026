@@ -1,0 +1,221 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  loginId       String    @unique
+  email         String    @unique
+  password      String
+  role          Role      @default(EMPLOYEE)
+  isFirstLogin  Boolean   @default(true)
+  refreshToken  String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  employee      Employee?
+  
+  @@map("users")
+}
+
+model Employee {
+  id                String    @id @default(uuid())
+  userId            String    @unique
+  employeeCode      String    @unique
+  firstName         String
+  lastName          String
+  phone             String?
+  profilePicture    String?
+  dateOfJoining     DateTime  @default(now())
+  department        String?
+  jobPosition       String?
+  managerId         String?
+  company           String?
+  location          String?
+  dateOfBirth       DateTime?
+  residingAddress   String?
+  personalEmail     String?
+  gender            Gender?
+  nationality       String?
+  maritalStatus     MaritalStatus?
+  panNo             String?
+  uanNo             String?
+  workingDaysPerWeek Int      @default(5)
+  breakTimeHours    Float     @default(1.0)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  
+  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  manager           Employee?   @relation("ManagerToEmployee", fields: [managerId], references: [id])
+  subordinates      Employee[]  @relation("ManagerToEmployee")
+  
+  bankDetails       BankDetails?
+  salaryInfo        SalaryInfo?
+  attendances       Attendance[]
+  leaves            Leave[]
+  leaveAllocations  LeaveAllocation[]
+  skills            Skill[]
+  certifications    Certification[]
+  
+  @@map("employees")
+}
+
+model BankDetails {
+  id            String    @id @default(uuid())
+  employeeId    String    @unique
+  accountNumber String
+  bankName      String
+  ifscCode      String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  employee      Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  
+  @@map("bank_details")
+}
+
+model SalaryInfo {
+  id                  String    @id @default(uuid())
+  employeeId          String    @unique
+  monthlyWage         Float
+  yearlyWage          Float
+  basicSalary         Float
+  hra                 Float
+  standardAllowance   Float
+  performanceBonus    Float
+  lta                 Float
+  fixedAllowance      Float
+  pfEmployee          Float
+  pfEmployer          Float
+  professionalTax     Float
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  
+  employee            Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  
+  @@map("salary_info")
+}
+
+model Attendance {
+  id            String          @id @default(uuid())
+  employeeId    String
+  date          DateTime        @default(now())
+  checkIn       DateTime?
+  checkOut      DateTime?
+  workHours     Float           @default(0)
+  extraHours    Float           @default(0)
+  status        AttendanceStatus @default(ABSENT)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  
+  employee      Employee        @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  
+  @@unique([employeeId, date])
+  @@map("attendances")
+}
+
+model Leave {
+  id            String      @id @default(uuid())
+  employeeId    String
+  leaveType     LeaveType
+  startDate     DateTime
+  endDate       DateTime
+  status        LeaveStatus @default(PENDING)
+  remarks       String?
+  attachment    String?
+  approvedBy    String?
+  approvedAt    DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  employee      Employee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  
+  @@map("leaves")
+}
+
+model LeaveAllocation {
+  id            String      @id @default(uuid())
+  employeeId    String
+  leaveType     LeaveType
+  allocatedDays Float
+  usedDays      Float       @default(0)
+  year          Int
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  employee      Employee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  
+  @@unique([employeeId, leaveType, year])
+  @@map("leave_allocations")
+}
+
+model Skill {
+  id            String      @id @default(uuid())
+  employeeId    String
+  skillName     String
+  createdAt     DateTime    @default(now())
+  
+  employee      Employee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  
+  @@map("skills")
+}
+
+model Certification {
+  id            String      @id @default(uuid())
+  employeeId    String
+  certName      String
+  issueDate     DateTime?
+  expiryDate    DateTime?
+  createdAt     DateTime    @default(now())
+  
+  employee      Employee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  
+  @@map("certifications")
+}
+
+// Enums
+enum Role {
+  ADMIN
+  HR
+  EMPLOYEE
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum MaritalStatus {
+  SINGLE
+  MARRIED
+  DIVORCED
+  WIDOWED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  HALF_DAY
+  LEAVE
+}
+
+enum LeaveType {
+  PAID
+  SICK
+  UNPAID
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
