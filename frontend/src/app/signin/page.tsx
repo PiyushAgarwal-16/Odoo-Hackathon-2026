@@ -37,7 +37,16 @@ export default function SignInPage() {
                 router.push('/dashboard');
             }
         } catch (err: any) {
-            setError(err.response?.data?.error || 'Sign in failed. Please try again.');
+            console.error('Signin error:', err);
+            console.error('API URL:', process.env.NEXT_PUBLIC_API_URL);
+            
+            if (err.code === 'ERR_NETWORK') {
+                setError('Cannot connect to server. Please check your internet connection.');
+            } else if (err.response?.status === 401) {
+                setError('Invalid credentials. Please check your login ID and password.');
+            } else {
+                setError(err.response?.data?.error || 'Sign in failed. Please try again.');
+            }
         } finally {
             setLoading(false);
         }
